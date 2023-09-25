@@ -19,8 +19,8 @@ public class EnemyAI : MonoBehaviour
     }
     
     public State state = State.RETURN;
-    [SerializeField]
-    EnemyRaycast raycast;
+    // [SerializeField]
+    // EnemyRaycast raycast;
     NavMeshAgent nav;
     // public Transform playerTr;
     [SerializeField]
@@ -37,6 +37,8 @@ public class EnemyAI : MonoBehaviour
     //추적 사정거리
     public float traceDist = 10.0f;
     float Pdist;
+    [SerializeField]
+    EnemyView view;
     void Start()
     {
         nav = GetComponent<NavMeshAgent>();
@@ -66,19 +68,18 @@ public class EnemyAI : MonoBehaviour
 
             //적 캐릭터와 순찰구역 간의 거리를 계산
             float dist = Vector3.Distance(transform.position,target.transform.position);
-            if(raycast.look){
-                pl=raycast.pl;
-                playerTr=pl.transform;
+            if(view.look/*raycast.look*/){
+                playerTr=view.TelePos;
                 //적 캐릭터와 플레이어 간의 거리를 계산
                 Pdist = Vector3.Distance(transform.position,playerTr.position);
             }
                 //공격 사정거리 이내인 경울
-                if (raycast.look&&Pdist <= attackDist)
+                if (view.look&&Pdist <= attackDist)
                 {
                     state = State.ATTACK;
                 }
                 //추적 사정거리 이내인 경우
-                else if (raycast.look&&Pdist <= traceDist)//이것이 공격 사정거리에 없을 시(공격거리가 아닐시 더 확장해서(아마 범위 일것이다) 실행 되고 공격과 뒤바뀌면 traceDist와 충돌이 발생할 수 있다.
+                else if (view.look&&Pdist <= traceDist)//이것이 공격 사정거리에 없을 시(공격거리가 아닐시 더 확장해서(아마 범위 일것이다) 실행 되고 공격과 뒤바뀌면 traceDist와 충돌이 발생할 수 있다.
                 {
                     state = State.TRACE;
                 }
@@ -109,7 +110,7 @@ public class EnemyAI : MonoBehaviour
                 case State.RETURN:
                     Pos=target.transform.position;    //타겟의 위치를 순찰구역으로
                     //nav.ResetPath();
-                    raycast.look=false;
+                    view.look=false;
                     move(Pos);
                     break;
                 case State.STOP:
