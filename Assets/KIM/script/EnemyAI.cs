@@ -39,9 +39,14 @@ public class EnemyAI : MonoBehaviour
     float Pdist;
     [SerializeField]
     EnemyView view;
+
+    [SerializeField]
+    Rigidbody rb;
+
     void Start()
     {
         nav = GetComponent<NavMeshAgent>();
+        rb=GetComponent<Rigidbody>();
        // animator = GetComponent<Animator>();
        // animator.SetTrigger(hashRun);
         //target = GameObject.Find("area").GetComponent<Transform>();
@@ -57,6 +62,11 @@ public class EnemyAI : MonoBehaviour
         }
 
     }
+
+    void Update() {
+        //rb.velocity =Vector3.zero;
+    }
+
     public IEnumerator CheckState()
     {
         //적 캐릭터가 사망하기 전까지 도는 무한루프
@@ -104,6 +114,7 @@ public class EnemyAI : MonoBehaviour
         while (!isDie)
         {
             yield return new WaitForSeconds(0.3f);//위에 설명되어 있다.
+            
             //상태에 따라 분기 처리
             switch(state)
             {

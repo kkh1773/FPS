@@ -551,6 +551,7 @@ MonoBehaviour:
   attackDist: 5
   traceDist: 10
   view: {fileID: 1355984374}
+  rb: {fileID: 0}
 --- !u!114 &1355984371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -629,7 +630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DebugMode: 0
   ViewAngle: 83
-  ViewRadius: 12.48
+  ViewRadius: 10
   TargetMask:
     serializedVersion: 2
     m_Bits: 8
