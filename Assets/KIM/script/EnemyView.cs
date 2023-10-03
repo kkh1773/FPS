@@ -14,7 +14,9 @@ public class EnemyView : MonoBehaviour
     
     public Transform TelePos;
     public bool look=false;
-
+    public bool att = false;
+    [SerializeField]
+    Collider[] Targets;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,11 +38,12 @@ public class EnemyView : MonoBehaviour
         Debug.DrawRay(myPos, rightDir * ViewRadius, Color.blue);
         Debug.DrawRay(myPos, leftDir * ViewRadius, Color.blue);
         Debug.DrawRay(myPos, lookDir * ViewRadius, Color.cyan);
-        
-        Collider[] Targets = Physics.OverlapSphere(myPos, ViewRadius,TargetMask);
+
+       
+        Targets = Physics.OverlapSphere(myPos, ViewRadius,TargetMask);
 
         if (Targets.Length == 0) return;
-        foreach(Collider EnemyColli in Targets)
+        /*foreach(Collider EnemyColli in Targets)
         {
             Vector3 targetPos = EnemyColli.transform.position;
             Vector3 targetDir = (targetPos - myPos).normalized;
@@ -49,13 +52,49 @@ public class EnemyView : MonoBehaviour
             if(targetAngle <= ViewAngle * 0.5f && !Physics.Raycast(myPos, targetDir, targetDis, ObstacleMask))
             {
                 look=true;
+                att = true;
                 hitTargetList.Add(EnemyColli);
                 TelePos=EnemyColli.transform;
                 if (DebugMode) Debug.DrawLine(myPos, targetPos, Color.red);
+            }else if (targetAngle <= ViewAngle * 0.5f && Physics.Raycast(myPos, targetDir, targetDis, ObstacleMask))
+            {
+                att = false;
             }
+
+
+        }*/
+        foreach (Collider EnemyColli in Targets)
+        {
+
+            Vector3 targetPos = EnemyColli.transform.position;
+            Vector3 targetDir = (targetPos - myPos).normalized;
+            UnityEngine.Debug.Log(targetDir);
+            float targetAngle = Mathf.Acos(Vector3.Dot(lookDir, targetDir)) * Mathf.Rad2Deg;
+            float targetdis = Vector3.Distance(myPos, targetPos);
+
             
+            if (targetAngle <= ViewAngle * 0.5f && targetdis<(ViewRadius-0.3)&&!Physics.Raycast(myPos, targetDir, targetdis, ObstacleMask))
+            {
+                if (DebugMode) Debug.DrawLine(myPos, targetPos, Color.red);
+
+                if (hitTargetList.Contains(EnemyColli) != true)
+                {
+                    hitTargetList.Add(EnemyColli);
+                    UnityEngine.Debug.Log("start");
+                }
+
+            }
+            else if (((ViewRadius * 0.01) <= targetAngle) || Physics.Raycast(myPos, targetDir, targetdis, ObstacleMask)||ViewRadius-targetdis<=0.6)
+            {
+                hitTargetList.Remove(EnemyColli);
+            }
+            else if (hitTargetList.Contains(EnemyColli) != false)
+            {
+                hitTargetList.Remove(EnemyColli);
+            }
+
         }
-        hitTargetList.Clear();
+        //hitTargetList.Clear();
         
     }
 

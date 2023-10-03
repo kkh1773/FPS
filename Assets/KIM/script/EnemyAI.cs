@@ -84,7 +84,7 @@ public class EnemyAI : MonoBehaviour
                 Pdist = Vector3.Distance(transform.position,playerTr.position);
             }
                 //공격 사정거리 이내인 경울
-                if (view.look&&Pdist <= attackDist)
+                if (view.att&&Pdist <= attackDist)
                 {
                     state = State.ATTACK;
                 }
@@ -92,8 +92,9 @@ public class EnemyAI : MonoBehaviour
                 else if (view.look&&Pdist <= traceDist)//이것이 공격 사정거리에 없을 시(공격거리가 아닐시 더 확장해서(아마 범위 일것이다) 실행 되고 공격과 뒤바뀌면 traceDist와 충돌이 발생할 수 있다.
                 {
                     state = State.TRACE;
+                Debug.Log(Pdist);
                 }
-                ////순찰구역의 위치가 자신과 떨어져 있을 때
+                ///순찰구역의 위치가 자신과 떨어져 있을 때
                 else if (dist >= area_in)
                 {
                     state = State.RETURN;
