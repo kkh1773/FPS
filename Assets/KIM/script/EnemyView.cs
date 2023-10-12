@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EnemyView : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class EnemyView : MonoBehaviour
     bool ishit=false;
     [SerializeField]List<Collider> hitTargetList = new List<Collider>();
     
-    public Transform TelePos;
+    public Vector3 TelePos;
     public bool look=false;
     public bool att = false;
     [SerializeField]
@@ -68,7 +69,6 @@ public class EnemyView : MonoBehaviour
 
             Vector3 targetPos = EnemyColli.transform.position;
             Vector3 targetDir = (targetPos - myPos).normalized;
-            UnityEngine.Debug.Log(targetDir);
             float targetAngle = Mathf.Acos(Vector3.Dot(lookDir, targetDir)) * Mathf.Rad2Deg;
             float targetdis = Vector3.Distance(myPos, targetPos);
 
@@ -76,7 +76,10 @@ public class EnemyView : MonoBehaviour
             if (targetAngle <= ViewAngle * 0.5f && targetdis<(ViewRadius-0.3)&&!Physics.Raycast(myPos, targetDir, targetdis, ObstacleMask))
             {
                 if (DebugMode) Debug.DrawLine(myPos, targetPos, Color.red);
-
+                look = true;
+                att = true;
+                //hitTargetList.Add(EnemyColli);
+                TelePos = EnemyColli.transform.position;
                 if (hitTargetList.Contains(EnemyColli) != true)
                 {
                     hitTargetList.Add(EnemyColli);
@@ -84,14 +87,19 @@ public class EnemyView : MonoBehaviour
                 }
 
             }
-            else if (((ViewRadius * 0.01) <= targetAngle) || Physics.Raycast(myPos, targetDir, targetdis, ObstacleMask)||ViewRadius-targetdis<=0.6)
+            else if (((ViewAngle * 0.5) <= targetAngle) || Physics.Raycast(myPos, targetDir, targetdis, ObstacleMask)||ViewRadius-targetdis<=0.6 || hitTargetList.Contains(EnemyColli) != false)//|| hitTargetList.Contains(EnemyColli) != false
             {
                 hitTargetList.Remove(EnemyColli);
+                att = false;
+                Debug.Log(TelePos);
+                Debug.Log(transform.position);
+                Debug.Log(Vector3.Distance(transform.position, TelePos));
+                if (Vector3.Distance(transform.position, TelePos) <= .5f)
+                {
+                    look = false;
+                }
             }
-            else if (hitTargetList.Contains(EnemyColli) != false)
-            {
-                hitTargetList.Remove(EnemyColli);
-            }
+            
 
         }
         //hitTargetList.Clear();
