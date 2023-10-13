@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    public enum State//구조체
+    public enum State
     {
         RETURN,
         STOP,
@@ -17,7 +17,7 @@ public class EnemyAI : MonoBehaviour
         DIE
     }
     
-    public State state = State.RETURN;
+    public State state = State.STOP;
     NavMeshAgent nav;
     [SerializeField]
     float speed = 2.0f;      //속도
@@ -46,28 +46,25 @@ public class EnemyAI : MonoBehaviour
     {
         nav = GetComponent<NavMeshAgent>();
         rb=GetComponent<Rigidbody>();
-        view = GetComponent<EnemyView>();
+        view =GameObject.Find("ray").GetComponent<EnemyView>(); //자식 오브젝트에 있는 EnemyView 가져옴
         nav.speed = speed;
-        startPos = transform.position;  //처음 위치한 구역을 기준으로 순찰
-        Pos = patroling();
-        Debug.Log(startPos);
-        
+        startPos = transform.position;  //처음 위치한 구역을 기준으로 순찰        
         if(!nav.pathPending)     
         {
-            nav.SetDestination(Pos);
             StartCoroutine("CheckState");
             StartCoroutine("Go");
         }
 
     }
-
+    private void Update()
+    {
+        rb.velocity = Vector3.zero; //충돌 시 미끄러지는거 방지
+    }
 
     public IEnumerator CheckState()
     {
-        //적 캐릭터가 사망하기 전까지 도는 무한루프
         while (!isDie)
         {
-            //상태가 사망이면 코루틴 함수를 종료시킴
             if (state == State.DIE)
                 yield break;
 
@@ -78,7 +75,7 @@ public class EnemyAI : MonoBehaviour
                 //적 캐릭터와 플레이어 간의 거리를 계산
                 Pdist = Vector3.Distance(transform.position,playerTr);
             }
-                //공격 사정거리 이내인 경우
+                //공격이 가능하고 공격 사정거리 이내인 경우
                 if (view.att&&Pdist <= attackDist)
                 {
                     state = State.ATTACK;
@@ -94,7 +91,7 @@ public class EnemyAI : MonoBehaviour
                 {
                     state = State.RETURN;
                 }
-                else if (state!=State.RETURN)
+                else if (state!=State.RETURN) //주위에 적이 없고 복귀가 끝났을 때
                 {
                     state = State.PATROL;
                 }
@@ -103,17 +100,13 @@ public class EnemyAI : MonoBehaviour
                     state = State.STOP;
                 }
             
-                
-            
-            //0.3초 대기하는 동안 제어건을 양보
             yield return new WaitForSeconds(0.3f);
         }
     }
     public IEnumerator Go(){
-        //적 캐릭터가 사망할때 까지 무한루프
         while (!isDie)
         {
-            yield return new WaitForSeconds(0.3f);//위에 설명되어 있다.
+            yield return new WaitForSeconds(0.3f);
             
             //상태에 따라 분기 처리
             switch(state)
@@ -161,6 +154,7 @@ public class EnemyAI : MonoBehaviour
     }
     void Stop(){
         nav.isStopped=true;
+        
         nav.velocity=Vector3.zero;
     }
 
