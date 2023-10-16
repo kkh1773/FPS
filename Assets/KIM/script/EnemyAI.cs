@@ -24,7 +24,7 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField]
     bool patroler = true; //순찰을 하는 타입의 병사인지 확인
-    Vector3 startPos;        //순찰구역의 위치
+    [SerializeField]Vector3 startPos;        //순찰구역의 위치
 
     Vector3 playerTr;
     [SerializeField]
@@ -95,7 +95,7 @@ public class EnemyAI : MonoBehaviour
                 {
                     state = State.PATROL;
                 }
-                else
+                else if(Vector3.Distance(Pos,transform.position)<=.1f)
                 {
                     state = State.STOP;
                 }
@@ -154,7 +154,7 @@ public class EnemyAI : MonoBehaviour
     }
     void Stop(){
         nav.isStopped=true;
-        
+        Pos=transform.position;
         nav.velocity=Vector3.zero;
     }
 
@@ -165,8 +165,8 @@ public class EnemyAI : MonoBehaviour
 
     Vector3 patroling() //순찰 목적지 정하기
     {
-        float xPos = startPos.x + Random.Range(1, 5);
-        float zPos = startPos.z + Random.Range(1, 5);
+        float xPos = startPos.x + Random.Range(-5, 5);
+        float zPos = startPos.z + Random.Range(-5, 5);
         return new Vector3(xPos, startPos.y, zPos);
     }
 }
