@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using TMPro;
@@ -8,107 +7,113 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    public enum State//구조체
+    public enum State
     {
-        RETURN,//복귀
-        STOP, //정지
-        TRACE,//추적
-        ATTACK,//공격
+        RETURN,
+        STOP,
+        TRACE,
+        ATTACK,
         PATROL,
-        DIE//뒤짐
+        DIE
     }
     
-    public State state = State.RETURN;
-    // [SerializeField]
-    // EnemyRaycast raycast;
+    public State state = State.STOP;
     NavMeshAgent nav;
-    // public Transform playerTr;
     [SerializeField]
     float speed = 2.0f;      //속도
+
     [SerializeField]
-    GameObject target;        //점령구역의 위치
-    GameObject pl;
-    Transform playerTr;
+    bool patroler = true; //순찰을 하는 타입의 병사인지 확인
+    [SerializeField]Vector3 startPos;        //순찰구역의 위치
+
+    Vector3 playerTr;
     [SerializeField]
     Vector3 Pos;          //타겟의 위치
     public bool isDie = false;
     float area_in=10;
-    public float attackDist = 5.0f;
-    //추적 사정거리
-    public float traceDist = 10.0f;
-    float Pdist;
+    public float attackDist = 15.0f;//공격 사정거리
+    public float traceDist = 30.0f;//추적 사정거리
+    float Pdist;  //플레이어와의 거리
+
+
     [SerializeField]
     EnemyView view;
+
+    [SerializeField]
+    Rigidbody rb;
+
     void Start()
     {
         nav = GetComponent<NavMeshAgent>();
-       // animator = GetComponent<Animator>();
-       // animator.SetTrigger(hashRun);
-        //target = GameObject.Find("area").GetComponent<Transform>();
+        rb=GetComponent<Rigidbody>();
+        view =GameObject.Find("ray").GetComponent<EnemyView>(); //자식 오브젝트에 있는 EnemyView 가져옴
         nav.speed = speed;
-        
-        Pos=target.transform.position;
-        
+        startPos = transform.position;  //처음 위치한 구역을 기준으로 순찰        
         if(!nav.pathPending)     
         {
-            nav.SetDestination(Pos);
             StartCoroutine("CheckState");
             StartCoroutine("Go");
         }
 
     }
+    private void Update()
+    {
+        rb.velocity = Vector3.zero; //충돌 시 미끄러지는거 방지
+    }
+
     public IEnumerator CheckState()
     {
-        //적 캐릭터가 사망하기 전까지 도는 무한루프
         while (!isDie)
         {
-            //상태가 사망이면 코루틴 함수를 종료시킴
             if (state == State.DIE)
                 yield break;
 
             //적 캐릭터와 순찰구역 간의 거리를 계산
-            float dist = Vector3.Distance(transform.position,target.transform.position);
+            float dist = Vector3.Distance(transform.position,startPos);
             if(view.look/*raycast.look*/){
                 playerTr=view.TelePos;
                 //적 캐릭터와 플레이어 간의 거리를 계산
-                Pdist = Vector3.Distance(transform.position,playerTr.position);
+                Pdist = Vector3.Distance(transform.position,playerTr);
             }
-                //공격 사정거리 이내인 경울
-                if (view.look&&Pdist <= attackDist)
+                //공격이 가능하고 공격 사정거리 이내인 경우
+                if (view.att&&Pdist <= attackDist)
                 {
                     state = State.ATTACK;
                 }
                 //추적 사정거리 이내인 경우
-                else if (view.look&&Pdist <= traceDist)//이것이 공격 사정거리에 없을 시(공격거리가 아닐시 더 확장해서(아마 범위 일것이다) 실행 되고 공격과 뒤바뀌면 traceDist와 충돌이 발생할 수 있다.
+                else if (view.look&&Pdist <= traceDist)
                 {
                     state = State.TRACE;
+                //Debug.Log(Pdist);
                 }
-                ////순찰구역의 위치가 자신과 떨어져 있을 때
+                ///순찰구역의 위치가 자신과 떨어져 있을 때
                 else if (dist >= area_in)
                 {
                     state = State.RETURN;
                 }
-                else
+                else if (state!=State.RETURN) //주위에 적이 없고 복귀가 끝났을 때
+                {
+                    state = State.PATROL;
+                }
+                else if(Vector3.Distance(Pos,transform.position)<=.1f)
                 {
                     state = State.STOP;
                 }
             
-                
-            
-            //0.3초 대기하는 동안 제어건을 양보
-            yield return new WaitForSeconds(0.3f);//yield문을 넣으면 이 구간 0.3초 동안 대기 즉 이 구문이 실행되는 동안 다른 루틴으로 빠져서 다른건 안가리 킨다. 그후 0.3초가 다 됬는지 코루틴이 확인후 다 되면 다시 이 구문으로 돌아와 실행된다. 
+            yield return new WaitForSeconds(0.3f);
         }
     }
     public IEnumerator Go(){
-        //적 캐릭터가 사망할때 까지 무한루프
         while (!isDie)
         {
-            yield return new WaitForSeconds(0.3f);//위에 설명되어 있다.
+            yield return new WaitForSeconds(0.3f);
+            
             //상태에 따라 분기 처리
             switch(state)
             {
                 case State.RETURN:
-                    Pos=target.transform.position;    //타겟의 위치를 순찰구역으로
+                    nav.isStopped = false;
+                    Pos =startPos;    //타겟의 위치를 순찰구역으로
                     //nav.ResetPath();
                     view.look=false;
                     move(Pos);
@@ -118,32 +123,29 @@ public class EnemyAI : MonoBehaviour
                     break;
                 case State.TRACE:
                     nav.isStopped=false;
-                    //총알 발사 정지
-                    //enemyFire.isFire = false;
                     //주인공의 위치를 넘겨 추적모드로 변경
-                    Pos = playerTr.position;
+                    Pos = playerTr;
                     move(Pos);
-                    //animator.SetBool(hashMove, true);
                     break;
                 case State.ATTACK:
-                    //순찰 및 추적을 정지
                     Stop();
-                    //animator.SetBool(hashMove, false);
+                    //공격 시작(추가 예정)
 
-                    /*//총알 발사 시작
-                    if (enemyFire.isFire == false)
-                        enemyFire.isFire = true;*/
+                    break;
+                case State.PATROL:
+                    nav.isStopped = false;
+                    if (Vector3.Distance(Pos, this.transform.position) <= 1f)
+                    {
+                        Pos = patroling();
+                        Debug.Log(1);
+                    }
+                    move(Pos);
                     break;
                 case State.DIE:
                     isDie = true;
-                    //enemyFire.isFire = false;
-                    //순찰 및 추적을 정지
                     Stop();
-                    //사망 애니메이션 의 종류를 지정
-                    //animator.SetInteger(hashDieIdx, Random.Range(0, 3));
-                    //사망 에니메이션 실행
-                    //animator.SetTrigger(hashDie);
-                    //Capsule Collider 컴포넌트를 비활성화
+                    //사망 애니메이션(추가 예정)
+
                     GetComponent<CapsuleCollider>().enabled = false;
                     break;
             }
@@ -152,11 +154,19 @@ public class EnemyAI : MonoBehaviour
     }
     void Stop(){
         nav.isStopped=true;
+        Pos=transform.position;
         nav.velocity=Vector3.zero;
     }
 
     void move(Vector3 pos){
         this.Pos=pos;
         nav.SetDestination(Pos);
+    }
+
+    Vector3 patroling() //순찰 목적지 정하기
+    {
+        float xPos = startPos.x + Random.Range(-5, 5);
+        float zPos = startPos.z + Random.Range(-5, 5);
+        return new Vector3(xPos, startPos.y, zPos);
     }
 }
