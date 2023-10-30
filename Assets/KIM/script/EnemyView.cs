@@ -32,9 +32,9 @@ public class EnemyView : MonoBehaviour
 
     private void OnDrawGizmos() { //기즈모 안에 들어왔을 때
         if (!DebugMode) return;
-        this.transform.rotation = transform.parent.rotation; //계속 날아가길래 위치 맞춰줌
-        this.transform.position = transform.parent.position;
-        Vector3 myPos = transform.position; //+ Vector3.up * 0.5f;
+        // this.transform.rotation = transform.parent.rotation; //계속 날아가길래 위치 맞춰줌
+        // this.transform.position = transform.parent.position;
+        Vector3 myPos = transform.position;//+ Vector3.up * 0.5f;
         Gizmos.DrawWireSphere(myPos, ViewRadius);
         float lookingAngle = transform.eulerAngles.y;  //캐릭터가 바라보는 방향의 각도
         Vector3 rightDir = AngleToDir(transform.eulerAngles.y + ViewAngle * 0.5f); //오른쪽 시야각 끝 지정
