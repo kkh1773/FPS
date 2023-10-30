@@ -461,13 +461,11 @@ MonoBehaviour:
   ObstacleMask:
     serializedVersion: 2
     m_Bits: 1
-  hitTargetList:
-  - {fileID: 1761644155}
-  TelePos: {x: -19, y: 10.55, z: -5.6}
+  hitTargetList: []
+  TelePos: {x: -12.4, y: 10.55, z: -4.8}
   look: 1
-  att: 1
-  Targets:
-  - {fileID: 1761644155}
+  att: 0
+  Targets: []
 --- !u!54 &791547121
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -988,7 +986,7 @@ Transform:
   m_GameObject: {fileID: 1761644154}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -19, y: 10.55, z: -5.6}
+  m_LocalPosition: {x: 5.7, y: 10.55, z: -3.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
