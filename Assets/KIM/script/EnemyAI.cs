@@ -34,7 +34,8 @@ public class EnemyAI : MonoBehaviour
     public float attackDist = 15.0f;//공격 사정거리
     public float traceDist = 30.0f;//추적 사정거리
     float Pdist;  //플레이어와의 거리
-
+    public int attackCountMax;  //공격횟수 유닛별로 지정
+    int attackCount=0;
 
     [SerializeField]
     EnemyView view;
@@ -42,11 +43,15 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     Rigidbody rb;
 
+    [SerializeField]
+    Fire fp;
+
     void Start()
     {
         nav = GetComponent<NavMeshAgent>();
         rb=GetComponent<Rigidbody>();
-        view =GameObject.Find("ray").GetComponent<EnemyView>(); //자식 오브젝트에 있는 EnemyView 가져옴
+        view =GetComponent<EnemyView>(); //자식 오브젝트에 있는 EnemyView 가져옴
+        fp=GetComponent<Fire>();
         nav.speed = speed;
         startPos = transform.position;  //처음 위치한 구역을 기준으로 순찰        
         if(!nav.pathPending)     
@@ -59,6 +64,9 @@ public class EnemyAI : MonoBehaviour
     private void Update()
     {
         rb.velocity = Vector3.zero; //충돌 시 미끄러지는거 방지
+        
+        Vector3 dir=playerTr-transform.position;
+        this.transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 5f);
     }
 
     public IEnumerator CheckState()
@@ -130,7 +138,14 @@ public class EnemyAI : MonoBehaviour
                 case State.ATTACK:
                     Stop();
                     //공격 시작(추가 예정)
-
+                    if(attackCount<=attackCountMax){
+                        fp.fire();
+                        attackCount++;
+                        Debug.Log(attackCount);
+                    }else{
+                        //재장전 모션 (GetCurrentAnimatorStateInfo)?
+                        attackCount=0;
+                    }
                     break;
                 case State.PATROL:
                     nav.isStopped = false;
