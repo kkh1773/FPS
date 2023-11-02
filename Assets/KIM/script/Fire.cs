@@ -16,6 +16,7 @@ public class Fire : MonoBehaviour
     }
 
     public void fire(){
-        Instantiate(bullet,firetr.position,firetr.rotation);
+        GameObject a = Instantiate(bullet, firetr.position, firetr.rotation);
+        a.gameObject.tag = this.gameObject.tag;
     }
 }

@@ -1151,6 +1151,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Soldier_urban_C
       objectReference: {fileID: 0}
+    - target: {fileID: 125240, guid: 914fd54b381fbcd41935572eabb11d13, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     - target: {fileID: 144534, guid: 914fd54b381fbcd41935572eabb11d13, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 8
