@@ -17,7 +17,7 @@ public class Bullet : MonoBehaviour
         {
             if (collision.gameObject.CompareTag("Player"))
             {
-
+                
             }
         }else if (gameObject.CompareTag("Player"))
         {
